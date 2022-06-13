@@ -29,6 +29,8 @@ CPU: Intel(R) Xeon(R) Gold 6226R CPU @ 2.90GHz \
 RAM: 256GB \
 GPU: NVIDIA GeForce RTX 3090 24GB
 
+# Packages
+Please refer to the `requirements.txt` for more details.
 
 # Get pretrained models
 Please use the following commnad to get the pretrained models
