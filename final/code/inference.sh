@@ -1,7 +1,7 @@
 # public set
 python3 test_seg.py --root ../dataset/ \
                     --load ./model_seg.pth \
-                    --subject S5 \ # modify it!
+                    --subject S5 \
                     --valid \
                     --model deeplab \
                     --conf_threshold 0.85 \
