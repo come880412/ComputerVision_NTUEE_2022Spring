@@ -14,6 +14,22 @@ final
     ├── valid.txt 
     ├── valid_eye.txt
 ``` 
+
+# Computer Equipment
+- System: Ubuntu20.04
+- Pytorch version: Pytorch 1.7 or higher
+- Python version: Python 3.7
+- Testing: \
+CPU: Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz \
+RAM: 32 GB \
+GPU: NVIDIA GeForce RTX 1080ti 12GB
+
+- Training: \
+CPU: Intel(R) Xeon(R) Gold 6226R CPU @ 2.90GHz \
+RAM: 256GB \
+GPU: NVIDIA GeForce RTX 3090 24GB
+
+
 # Get pretrained models
 Please use the following commnad to get the pretrained models
 ``` bash
