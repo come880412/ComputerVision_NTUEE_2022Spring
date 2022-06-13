@@ -1,6 +1,5 @@
 import argparse
 import os
-from random import weibullvariate
 from tqdm import tqdm
 
 import torch.nn as nn
