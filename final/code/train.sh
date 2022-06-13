@@ -18,23 +18,23 @@
 
 
 # Ganzin valid
-# python3 train_valid.py --epochs 30 --warmup_epochs 3  --saved_model ./checkpoint/ganzin/valid \
-#                --batch_size 96 --workers 4 --scheduler linearwarmup --device 0 --lr 7e-4 \
-#                --root ../dataset --img_size 640 480 --load ./checkpoint/TEyeD/valid/model_best.pth \
-#                --threshold 0.4
+python3 train_valid.py --epochs 30 --warmup_epochs 3  --saved_model ./checkpoint/ganzin/valid \
+               --batch_size 96 --workers 4 --scheduler linearwarmup --device 0 --lr 7e-4 \
+               --root ../dataset --img_size 640 480 --load ./valid_pretrain.pth \
+               --threshold 0.4
  
  # Ganzin_seg
-# CUDA_VISIBLE_DEVICES=1 python3 train_seg.py --epochs 40 --warmup_epochs 4 --model deeplab --save_model ./checkpoint/ganzin_alldata \
-#                --batch_size 16 --workers 8 --scheduler linearwarmup --device 1 --val_freq 2 \
-#                --root ../dataset --img_size 640 480 --dataset ganzin --lr 3e-4 --adam\
-#                --load ./checkpoint/TEyeD/deeplab/model_best.pth \
-#                --train_txt ../dataset/train90.txt --valid_txt ../dataset/valid90.txt
-
-CUDA_VISIBLE_DEVICES=0 python3 train_seg.py --epochs 30 --warmup_epochs 3 --model deeplab --save_model ./checkpoint/ganzin_alldata \
-               --batch_size 16 --workers 4 --scheduler linearwarmup --device 0 --val_freq 2 \
+CUDA_VISIBLE_DEVICES=1 python3 train_seg.py --epochs 40 --warmup_epochs 4 --model deeplab --save_model ./checkpoint/ganzin_validonly \
+               --batch_size 16 --workers 8 --scheduler linearwarmup --device 1 --val_freq 2 \
                --root ../dataset --img_size 640 480 --dataset ganzin --lr 3e-4 --adam\
-               --load ./checkpoint/TEyeD/deeplab/model_best.pth --non_valid \
-               --train_txt ../dataset/train90_2.txt --valid_txt ../dataset/valid90_2.txt
+               --load ./deeplab_pretrain.pth \
+               --train_txt ../dataset/train.txt --valid_txt ../dataset/valid.txt
+
+CUDA_VISIBLE_DEVICES=0 python3 train_seg.py --epochs 40 --warmup_epochs 4 --model deeplab --save_model ./checkpoint/ganzin_alldata \
+               --batch_size 16 --workers 8 --scheduler linearwarmup --device 0 --val_freq 2 \
+               --root ../dataset --img_size 640 480 --dataset ganzin --lr 3e-4 --adam\
+               --load ./deeplab_pretrain.pth --non_valid \
+               --train_txt ../dataset/train.txt --valid_txt ../dataset/valid.txt
 
 # python3 train_seg.py --epochs 40 --warmup_epochs 4 --model segformer --save_model ./checkpoint/ganzin \
 #                --batch_size 16 --workers 8 --scheduler linearwarmup --device 1 --val_freq 2 \

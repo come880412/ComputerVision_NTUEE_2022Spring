@@ -469,7 +469,7 @@ def get_args():
 
     parser.add_argument('--load', type=str, default='./model_seg.pth', help='Load model from a .pth file')
     parser.add_argument('--save_fig', default='./out_mask', help='path to save figures')
-    parser.add_argument('--public_mask', default='./public_mask_deeplab', help='path to save pred masks')
+    parser.add_argument('--public_mask', default='./public_mask', help='path to save pred masks')
     parser.add_argument('--subject', default='', help='Which subject you want to predict')
     parser.add_argument('--valid', action='store_true', help='Whether to use valid model!')
 
