@@ -427,7 +427,7 @@ def test_challenge(args, model_seg, model_valid):
                         kernel = np.ones((3, 3), np.uint8)
                         output = cv2.dilate(output, kernel=kernel, iterations=1)
 
-                        if not isvalidarea(output, th_area=1000):
+                        if not isvalidarea(output, th_area=100):
                             image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
                             image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
                             output = pupilTrack(image_cv)
@@ -463,13 +463,14 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='2022 cv final project -- Pupil tracking',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--root', type=str, default='../dataset', help='Number of epochs')
+    parser.add_argument('--root', type=str, default='../dataset/HM', help='Number of epochs')
     parser.add_argument('--train_txt', type=str, default='../dataset/train.txt', help='path to dataset')
     parser.add_argument('--valid_txt', type=str, default='../dataset/valid.txt', help='path to dataset')
 
-    parser.add_argument('--load', type=str, default='./model_seg.pth', help='Load model from a .pth file')
+    parser.add_argument('--load_seg', type=str, default='./checkpoint/ganzin/deeplab_validonly/model_best.pth', help='Load model from a .pth file')
+    parser.add_argument('--load_valid', type=str, default='./checkpoint/ganzin/valid/model_best.pth', help='Load model from a .pth file')
     parser.add_argument('--save_fig', default='./out_mask', help='path to save figures')
-    parser.add_argument('--public_mask', default='./public_mask', help='path to save pred masks')
+    parser.add_argument('--public_mask', default='./public_mask_deeplab', help='path to save pred masks')
     parser.add_argument('--subject', default='', help='Which subject you want to predict')
     parser.add_argument('--valid', action='store_true', help='Whether to use valid model!')
 
@@ -498,7 +499,8 @@ if __name__ == '__main__':
 
     model_valid = models.resnet18(pretrained=True)
     model_valid.fc = nn.Linear(model_valid.fc.in_features, 1)
-    model_valid.load_state_dict(torch.load('./model_valid.pth'))
+    if args.valid:
+        model_valid.load_state_dict(torch.load(args.load_valid))
     model_valid = model_valid.cuda()
     model_valid.eval()
 
@@ -517,9 +519,9 @@ if __name__ == '__main__':
         model_seg.decode_head.linear_pred = nn.Conv2d(512, args.num_classes, 1)
         model_seg = nn.DataParallel(model_seg)
     
-    if args.load:
+    if args.load_seg:
         print("Load pretrained model!!")
-        model_seg.load_state_dict(torch.load(args.load))
+        model_seg.load_state_dict(torch.load(args.load_seg))
 
     model_seg = model_seg.cuda()
     model_seg.eval()
