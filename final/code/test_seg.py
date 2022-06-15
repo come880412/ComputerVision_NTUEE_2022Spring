@@ -93,18 +93,21 @@ def valid(args, model_seg, model_valid, loss_func):
                         output = convex_hull(output.astype(np.uint8) * 255) / 255
 
                         conf = np.mean(prob[output == 255.0])
-                        # kernel = np.ones((3, 3), np.uint8)
-                        # output = cv2.dilate(output, kernel=kernel, iterations=1)
+                        kernel = np.ones((3, 3), np.uint8)
+                        output = cv2.dilate(output, kernel=kernel, iterations=1)
 
-                        # if not isvalidarea(output, th_area=1000):
-                        #     image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                        #     image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                        #     output = pupilTrack(image_cv)
+                        if not isvalidarea(output, th_area=1000):
+                            image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
+                            image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
+                            output = pupilTrack(image_cv)
 
                         pred_label[batch] = output
                         
                         if conf < args.conf_threshold or valid_pred < args.val_threshold:
                             conf = 0.0
+                            image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
+                            image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
+                            pred_label[batch] = pupilTrack(image_cv) / 255
                             # pred_label[batch] = np.zeros(pred_label[batch].shape)
                         else:
                             conf = 1.0
@@ -258,22 +261,13 @@ def test(args, model_seg, model_valid):
                         kernel = np.ones((3, 3), np.uint8)
                         output = cv2.dilate(output, kernel=kernel, iterations=1)
 
-                        if not isvalidarea(output, th_area=1000):
-                            image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                            image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                            output = pupilTrack(image_cv)
-
                         pred_label[batch] = output / 255
                         
                         if conf < args.conf_threshold or valid_pred < args.val_threshold:
                             conf = 0.0
-                            # pred_label[batch] = np.zeros(pred_label[batch].shape)
                         else:
                             conf = 1.0
                     else:  # empty ground truth label
-                        image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                        image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                        pred_label[batch] = pupilTrack(image_cv) / 255
                         conf = 0.0
 
                 else:
@@ -289,24 +283,20 @@ def test(args, model_seg, model_valid):
                         kernel = np.ones((3, 3), np.uint8)
                         output = cv2.dilate(output, kernel=kernel, iterations=1)
 
-                        if not isvalidarea(output, th_area=1000):
-                            image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                            image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                            output = pupilTrack(image_cv)
-
                         pred_label[batch] = output / 255
                         
                         if conf < args.conf_threshold:
                             conf = 0.0
-                            # pred_label[batch] = np.zeros(pred_label[batch].shape)
                         else:
                             conf = 1.0
                     else:  # empty ground truth label
-                        image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                        image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                        pred_label[batch] = pupilTrack(image_cv) / 255
                         conf = 0.0
-                
+
+                if conf == 0.0 or not isvalidarea(output, th_area=1000):
+                    image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
+                    image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
+                    pred_label[batch] = pupilTrack(src=image_cv, gamma=0.1, minArea=500, maxArea=6000) / 255
+
                 conf_dict[id[batch]].append(conf)
                 """plot segmentation map"""
                 pred_label[batch] = pred_label[batch].astype(np.uint8)
@@ -396,22 +386,13 @@ def test_challenge(args, model_seg, model_valid):
                         kernel = np.ones((3, 3), np.uint8)
                         output = cv2.dilate(output, kernel=kernel, iterations=1)
 
-                        if not isvalidarea(output, th_area=1000):
-                            image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                            image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                            output = pupilTrack(image_cv)
-
                         pred_label[batch] = output / 255
                         
                         if conf < args.conf_threshold or valid_pred < args.val_threshold:
                             conf = 0.0
-                            # pred_label[batch] = np.zeros(pred_label[batch].shape)
                         else:
                             conf = 1.0
                     else:  # empty ground truth label
-                        image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                        image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                        pred_label[batch] = pupilTrack(image_cv) / 255
                         conf = 0.0
 
                 else:
@@ -427,24 +408,20 @@ def test_challenge(args, model_seg, model_valid):
                         kernel = np.ones((3, 3), np.uint8)
                         output = cv2.dilate(output, kernel=kernel, iterations=1)
 
-                        if not isvalidarea(output, th_area=100):
-                            image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                            image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                            output = pupilTrack(image_cv)
-
                         pred_label[batch] = output / 255
                         
                         if conf < args.conf_threshold:
                             conf = 0.0
-                            # pred_label[batch] = np.zeros(pred_label[batch].shape)
                         else:
                             conf = 1.0
                     else:  # empty ground truth label
-                        image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
-                        image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
-                        pred_label[batch] = pupilTrack(image_cv) / 255
+                        
                         conf = 0.0
                 
+                if conf == 0.0 or not isvalidarea(output, th_area=100):
+                    image_cv = np.transpose(image[batch].copy(), (1, 2, 0))
+                    image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
+                    pred_label[batch] = pupilTrack(src=image_cv, gamma=0.2, minArea=100, maxArea=1000) / 255
                 conf_list.append(conf)
                 """plot segmentation map"""
                 pred_label[batch] = pred_label[batch].astype(np.uint8)
@@ -463,15 +440,15 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='2022 cv final project -- Pupil tracking',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--root', type=str, default='../dataset/HM', help='Number of epochs')
+    parser.add_argument('--root', type=str, default='../dataset', help='Number of epochs')
     parser.add_argument('--train_txt', type=str, default='../dataset/train.txt', help='path to dataset')
     parser.add_argument('--valid_txt', type=str, default='../dataset/valid.txt', help='path to dataset')
 
-    parser.add_argument('--load_seg', type=str, default='./checkpoint/ganzin/deeplab_validonly/model_best.pth', help='Load model from a .pth file')
+    parser.add_argument('--load_seg', type=str, default='./checkpoint/ganzin/deeplab_alldata/model_best.pth', help='Load model from a .pth file')
     parser.add_argument('--load_valid', type=str, default='./checkpoint/ganzin/valid/model_best.pth', help='Load model from a .pth file')
     parser.add_argument('--save_fig', default='./out_mask', help='path to save figures')
     parser.add_argument('--public_mask', default='./public_mask_deeplab', help='path to save pred masks')
-    parser.add_argument('--subject', default='', help='Which subject you want to predict')
+    parser.add_argument('--subject', default='S5', help='Which subject you want to predict')
     parser.add_argument('--valid', action='store_true', help='Whether to use valid model!')
 
     parser.add_argument('--num_classes', type=int,default=2, help='Number of classes')

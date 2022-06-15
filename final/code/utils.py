@@ -86,54 +86,55 @@ def isvalidarea(src, th_area = 1000):
     else:
         return False
 
-def pupilTrack(src: np.ndarray, threshold: int = 180, ratio: float = 0.8) -> np.ndarray:
+def pupilTrack(src: np.ndarray, gamma: float, minArea: int, maxArea: int) -> np.ndarray:
     """
         This program is used to detect the pupil part and output the detection result.
         :param src: np.ndarray -> input image.
-        :param threshold: int -> threshold of binary method.
-        :param ratio: float -> The ratio of the mask to the ellipse, if the ratio reaches a certain value, the mask will be filled.
+        :param gamma: float -> value of Gamma Correction.
+        :param minArea: int -> Prediction of the minimum area of the pupil.
+        :param maxArea: int -> Prediction of the maximum area of the pupil.
         :return: output: np.ndarray - > output image with mask.
     """
     img = src.copy()
 
-    # Step1. use GaussianBlur to reduce noise.
+    # Step1. Color to Gray
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Step2. use GaussianBlur to reduce noise.
     img = cv2.GaussianBlur(src=img, ksize=(5, 5), sigmaX=2)
 
-    # Step2. Gamma Transform
-    gamma = 0.1
+    # Step3. Gamma Correction
     img_gamma = np.power(img.copy() / 255.0, gamma)
     img_gamma = img_gamma * 255.0
     img_gamma = img_gamma.astype(np.uint8)
 
-    img_threshold = np.zeros(shape=img.shape, dtype=np.uint8)
+    # Step4. Binarization
+    ret, _ = cv2.threshold(img_gamma, 50, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, img_threshold = cv2.threshold(img_gamma, ret * 0.8, 255, cv2.THRESH_BINARY)
 
-    # img_threshold[np.where(img_gamma > int(np.mean(img_gamma) - np.std(img_gamma)))] = 255
-    img_threshold[np.where(img_gamma > threshold)] = 255
-
-    plt.imshow(img_threshold, cmap='gray')
-    plt.show()
-
-    # Step3. Find Contours
+    # Step5. Find the contour and check if it is the pupil part
     contours, hierarchy = cv2.findContours(img_threshold, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-
-    # Step4. Check each area of the contours
     area = ([cv2.contourArea(contour) for contour in contours])
 
     idx = -1
-    for i in np.where(area > np.array(1000))[0]:
-        if area[i] != np.max(area):
-            idx = i
+    for i in range(len(area)):
+        if minArea <= area[i] <= maxArea:
+            ellipse = cv2.fitEllipse(contours[i])
+            axis_l, axis_s = max(ellipse[1]), min(ellipse[1])
+            if area[i] != np.max(area) and 0.4 <= axis_s / axis_l <= 1:
+                idx = i
 
-    output = np.zeros(shape=img.shape, dtype=np.uint8)
+    # Step6. Add a mask to the pupil.
+    output = np.zeros(shape=src.shape, dtype=np.uint8)
+    mask = np.zeros(shape=img.shape, dtype=np.uint8)
 
     if idx == -1:
-        return np.zeros(shape=img.shape, dtype=np.uint8)
+        return mask
+    else:
+        ellipse = cv2.fitEllipse(contours[idx])
+        mask = cv2.ellipse(mask, ellipse, 255, -1, cv2.LINE_AA)
 
-    # Step5. Add a mask to the pupil.
-    ellipse = cv2.fitEllipse(contours[idx])
-    outputArea = np.pi * ellipse[1][0] * ellipse[1][1] / 4
-
-    return cv2.ellipse(output, ellipse, 255, -1) if area[idx] / outputArea >= ratio else output
+        return mask
 
 class AverageMeter:
     """Computes and stores the average and current value"""
