@@ -1,7 +1,7 @@
 # Final project -- Pupil Tracking
 Project website: https://codalab.lisn.upsaclay.fr/competitions/5120#results
 
-# Data root
+# Folder structure
 ``` 
 final 
   ├── code/ 
